@@ -5,75 +5,66 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"testing"
-	"time"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/ory/dockertest/v4"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/testcontainers/testcontainers-go/modules/postgres"
 
 	"authbackend/generated/db"
 	"authbackend/internal/domain"
 )
 
-var testDB *db.Queries
-var testDSN string
+func setupTestDB(t *testing.T) *db.Queries {
+	ctx := context.Background()
 
-func setupTest(t *testing.T) *db.Queries {
-	pool := dockertest.NewPoolT(t, "")
-	dbContainer := pool.RunT(t, "postgres",
-		dockertest.WithTag("15"),
-		dockertest.WithEnv([]string{
-			"POSTGRES_PASSWORD=secret",
-			"POSTGRES_USER=postgres",
-			"POSTGRES_DB=postgres",
-		}),
+	pgContainer, err := postgres.Run(ctx,
+		"postgres:15-alpine",
+		postgres.WithDatabase("testdb"),
+		postgres.WithUsername("postgres"),
+		postgres.WithPassword("secret"),
+		postgres.BasicWaitStrategies(),
 	)
-
-	hostPort := dbContainer.GetHostPort("5432/tcp")
-	testDSN = fmt.Sprintf("postgres://postgres:secret@%s/postgres?sslmode=disable", hostPort)
-
-	err := pool.Retry(t.Context(), 30*time.Second, func() error {
-		ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
-		defer cancel()
-
-		conn, err := pgx.Connect(ctx, testDSN)
-		if err != nil {
-			return err
-		}
-		defer conn.Close(ctx)
-
-		_, err = conn.Exec(ctx, `
-			CREATE TABLE IF NOT EXISTS users (
-				id BIGSERIAL PRIMARY KEY,
-				name text NOT NULL UNIQUE,
-				email text NOT NULL,
-				password_hash text,
-				created_at timestamptz NOT NULL DEFAULT now(),
-				is_active boolean NOT NULL DEFAULT false
-			);
-			CREATE INDEX IF NOT EXISTS users_email_lower_idx ON users (lower(email));
-			CREATE INDEX IF NOT EXISTS users_is_active_idx ON users (is_active);
-		`)
-		return err
+	if err != nil {
+		t.Fatalf("failed to start container: %v", err)
+	}
+	t.Cleanup(func() {
+		pgContainer.Terminate(ctx)
 	})
+
+	dsn, err := pgContainer.ConnectionString(ctx)
 	if err != nil {
-		t.Fatalf("could not setup database: %v", err)
+		t.Fatalf("failed to get dsn: %v", err)
 	}
 
-	conn, err := pgx.Connect(t.Context(), testDSN)
+	pool, err := pgxpool.New(ctx, dsn)
 	if err != nil {
-		t.Fatalf("could not connect: %v", err)
+		t.Fatalf("failed to connect: %v", err)
 	}
-	_ = conn
+	t.Cleanup(func() {
+		pool.Close()
+	})
 
-	testDB = db.New(conn)
+	_, err = pool.Exec(ctx, `
+		CREATE TABLE IF NOT EXISTS users (
+			id BIGSERIAL PRIMARY KEY,
+			name text NOT NULL UNIQUE,
+			email text NOT NULL,
+			password_hash text,
+			created_at timestamptz NOT NULL DEFAULT now(),
+			is_active boolean NOT NULL DEFAULT false
+		);
+		CREATE INDEX IF NOT EXISTS users_email_lower_idx ON users (lower(email));
+		CREATE INDEX IF NOT EXISTS users_is_active_idx ON users (is_active);
+	`)
+	if err != nil {
+		t.Fatalf("failed to create schema: %v", err)
+	}
 
-	return testDB
+	return db.New(pool)
 }
 
 func TestUserRepository_Create(t *testing.T) {
-	db := setupTest(t)
+	db := setupTestDB(t)
 	repo := NewUserRepository(db)
 
 	user := &domain.User{
@@ -93,7 +84,7 @@ func TestUserRepository_Create(t *testing.T) {
 }
 
 func TestUserRepository_GetByID(t *testing.T) {
-	db := setupTest(t)
+	db := setupTestDB(t)
 	repo := NewUserRepository(db)
 
 	createUser := &domain.User{
@@ -116,7 +107,7 @@ func TestUserRepository_GetByID(t *testing.T) {
 }
 
 func TestUserRepository_GetByEmail(t *testing.T) {
-	db := setupTest(t)
+	db := setupTestDB(t)
 	repo := NewUserRepository(db)
 
 	createUser := &domain.User{
@@ -139,7 +130,7 @@ func TestUserRepository_GetByEmail(t *testing.T) {
 }
 
 func TestUserRepository_UpdatePassword(t *testing.T) {
-	db := setupTest(t)
+	db := setupTestDB(t)
 	repo := NewUserRepository(db)
 
 	createUser := &domain.User{
@@ -168,7 +159,7 @@ func TestUserRepository_UpdatePassword(t *testing.T) {
 }
 
 func TestUserRepository_Delete(t *testing.T) {
-	db := setupTest(t)
+	db := setupTestDB(t)
 	repo := NewUserRepository(db)
 
 	createUser := &domain.User{
@@ -192,7 +183,7 @@ func TestUserRepository_Delete(t *testing.T) {
 }
 
 func TestUserRepository_Activate(t *testing.T) {
-	db := setupTest(t)
+	db := setupTestDB(t)
 	repo := NewUserRepository(db)
 
 	createUser := &domain.User{
