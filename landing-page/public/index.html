@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LogSwarm - AI-Powered Log Aggregation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="dark"] {
+      --bg-app: #000000;
+      --bg-sidebar: rgba(10, 10, 10, 0.85);
+      --bg-elevated: rgba(20, 20, 20, 0.9);
+      --bg-hover: rgba(31, 31, 31, 0.85);
+      --bg-active: rgba(42, 42, 42, 0.9);
+      --border-subtle: rgba(34, 34, 34, 0.6);
+      --border-default: rgba(51, 51, 51, 0.7);
+      --text-primary: rgba(255, 255, 255, 0.95);
+      --text-secondary: rgba(153, 153, 153, 0.85);
+      --text-tertiary: rgba(102, 102, 102, 0.7);
+      --text-inverse: #000000;
+      --accent: #FC9D4F;
+      --accent-hover: #FDB771;
+      --accent-gradient: linear-gradient(135deg, #FC9D4F 0%, #FFD280 100%);
+      --accent-glow: rgba(252, 157, 79, 0.5);
+      --accent-subtle: rgba(252, 157, 79, 0.2);
+      --danger: #FF8080;
+      --warning: #FFD280;
+      --info: #80BFFF;
+      --success: #6EE7B7;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.5);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.6);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.7);
+      --shadow-glow: 0 0 60px rgba(252, 157, 79, 0.4);
+    }
+
+    [data-theme="light"] {
+      --bg-app: #FFFFFF;
+      --bg-sidebar: rgba(250, 250, 250, 0.9);
+      --bg-elevated: rgba(255, 255, 255, 0.95);
+      --bg-hover: rgba(245, 245, 245, 0.85);
+      --bg-active: rgba(240, 240, 240, 0.9);
+      --border-subtle: rgba(0, 0, 0, 0.08);
+      --border-default: rgba(0, 0, 0, 0.15);
+      --text-primary: rgba(0, 0, 0, 0.9);
+      --text-secondary: rgba(0, 0, 0, 0.6);
+      --text-tertiary: rgba(0, 0, 0, 0.4);
+      --text-inverse: #FFFFFF;
+      --accent: #FC9D4F;
+      --accent-hover: #FDB771;
+      --accent-gradient: linear-gradient(135deg, #FC9D4F 0%, #FFD280 100%);
+      --accent-glow: rgba(252, 157, 79, 0.35);
+      --accent-subtle: rgba(252, 157, 79, 0.15);
+      --danger: #EF4444;
+      --warning: #F59E0B;
+      --info: #3B82F6;
+      --success: #22C55E;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+      --shadow-glow: 0 0 60px rgba(252, 157, 79, 0.25);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-app);
+      color: var(--text-primary);
+      line-height: 1.5;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: var(--bg-sidebar);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 18px;
+      color: var(--text-primary);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--accent-gradient);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .logo-icon svg {
+      width: 18px;
+      height: 18px;
+      color: white;
+    }
+
+    .nav-center {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-link {
+      padding: 8px 14px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 400;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-link:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .theme-toggle {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .theme-toggle:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+      font-family: var(--font-sans);
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      color: var(--text-inverse);
+      box-shadow: 0 4px 15px var(--accent-glow);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 6px 25px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-default);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent);
+    }
+
+    .hero {
+      padding: 140px 0 80px;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px;
+      height: 400px;
+      background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
+      pointer-events: none;
+      animation: heroGlow 4s ease-in-out infinite;
+    }
+
+    @keyframes heroGlow {
+      0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 600;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 540px;
+      margin: 0 auto 36px;
+      line-height: 1.6;
+      animation: fadeInUp 0.8s ease-out 0.2s backwards;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.8s ease-out 0.4s backwards;
+    }
+
+    .features {
+      padding: 60px 0;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .section-header h2 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .section-header p {
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .feature-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.3s ease;
+      animation: fadeInUp 0.6s ease-out backwards;
+    }
+
+    .feature-card:nth-child(1) { animation-delay: 0.1s; }
+    .feature-card:nth-child(2) { animation-delay: 0.2s; }
+    .feature-card:nth-child(3) { animation-delay: 0.3s; }
+    .feature-card:nth-child(4) { animation-delay: 0.4s; }
+    .feature-card:nth-child(5) { animation-delay: 0.5s; }
+    .feature-card:nth-child(6) { animation-delay: 0.6s; }
+
+    .feature-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-glow);
+      background: var(--bg-hover);
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--accent-subtle);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      color: var(--accent);
+    }
+
+    .feature-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .feature-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .demo-section {
+      padding: 60px 0;
+      background: var(--bg-sidebar);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .demo-window {
+      background: var(--bg-app);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .demo-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .demo-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .demo-title .status {
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .demo-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .demo-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--border-default);
+    }
+
+    .logs-container {
+      height: 320px;
+      overflow: hidden;
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .log-entry {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .log-time {
+      color: var(--text-tertiary);
+      white-space: nowrap;
+      min-width: 85px;
+    }
+
+    .log-level {
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .log-level.info { background: rgba(51, 153, 255, 0.15); color: var(--info); }
+    .log-level.warn { background: rgba(255, 204, 0, 0.15); color: var(--warning); }
+    .log-level.error { background: rgba(255, 51, 51, 0.15); color: var(--danger); }
+
+    .log-service {
+      color: var(--text-tertiary);
+      white-space: nowrap;
+    }
+
+    .log-message {
+      color: var(--text-primary);
+      flex: 1;
+    }
+
+    .cta {
+      padding: 80px 0;
+      text-align: center;
+    }
+
+    .cta h2 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .cta p {
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      font-size: 15px;
+    }
+
+    .contact-form {
+      display: flex;
+      gap: 10px;
+      max-width: 380px;
+      margin: 0 auto;
+    }
+
+    .contact-form input {
+      flex: 1;
+      padding: 12px 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: var(--font-sans);
+      outline: none;
+      transition: all 0.15s;
+    }
+
+    .contact-form input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-subtle);
+    }
+
+    .contact-form input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--text-tertiary);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.15s;
+    }
+
+    .footer-links a:hover {
+      color: var(--text-primary);
+    }
+
+    .footer-copy {
+      color: var(--text-tertiary);
+      font-size: 13px;
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 32px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .nav-center { display: none; }
+      .contact-form { flex-direction: column; }
+      .footer-content { flex-direction: column; gap: 16px; text-align: center; }
+      .logs-container { height: 280px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <nav>
+        <a href="/" class="logo">
+          <div class="logo-icon">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          LogSwarm
+        </a>
+        <div class="nav-center">
+          <a href="#features" class="nav-link">Features</a>
+          <a href="#pricing" class="nav-link">Pricing</a>
+        </div>
+        <div class="nav-right">
+          <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+            <svg class="sun-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display: none;">
+              <circle cx="12" cy="12" r="5"/>
+              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+            </svg>
+            <svg class="moon-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+            </svg>
+          </button>
+          <a href="#contact" class="btn btn-primary">Get started</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container hero-content">
+      <h1>The future of<br>log management is here</h1>
+      <p>Join the AI revolution. LogSwarm uses advanced AI to detect log levels, send instant alerts, and organize your logs — so you can focus on building the future.</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn btn-primary">Join the waitlist</a>
+        <a href="#pricing" class="btn btn-secondary">See pricing</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header">
+        <h2>Built for the future</h2>
+        <p>Everything you need to stay ahead</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+            </svg>
+          </div>
+          <h3>AI Log Detection</h3>
+          <p>Our AI automatically detects and classifies log levels with high accuracy.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+          </div>
+          <h3>Smart Alerts</h3>
+          <p>Get instant notifications when critical errors occur via Slack, Discord, or Email.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <h3>MCP for AI Agents</h3>
+          <p>Give your AI agents direct MCP access to query and analyze log storage.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
+            </svg>
+          </div>
+          <h3>Organized Storage</h3>
+          <p>Logs are automatically indexed and organized. Search millions of logs instantly.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <h3>Analytics Dashboard</h3>
+          <p>Visualize log patterns, error rates, and system health in real-time.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+          </div>
+          <h3>Secure & Compliant</h3>
+          <p>Enterprise-grade security with encryption. SOC2 compliant.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="demo-section" id="demo">
+    <div class="container">
+      <div class="section-header">
+        <h2>Logs in real-time</h2>
+        <p>AI-powered log processing happening right now</p>
+      </div>
+      <div class="demo-window">
+        <div class="demo-header">
+          <div class="demo-title">
+            <span class="status"></span>
+            Live Log Stream
+          </div>
+          <div class="demo-dots">
+            <span class="demo-dot"></span>
+            <span class="demo-dot"></span>
+            <span class="demo-dot"></span>
+          </div>
+        </div>
+        <div class="logs-container" id="logsContainer"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta" id="contact">
+    <div class="container">
+      <h2>Be part of the future</h2>
+      <p>Join thousands of developers building the next generation of log management.</p>
+      <form class="contact-form" id="contactForm">
+        <input type="email" name="email" placeholder="Enter your email" required>
+        <button type="submit" class="btn btn-primary">Join waitlist</button>
+      </form>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <ul class="footer-links">
+          <li><a href="#">About</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Privacy</a></li>
+          <li><a href="#">Terms</a></li>
+        </ul>
+        <p class="footer-copy">© 2026 LogSwarm. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const html = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+    const sunIcon = themeToggle.querySelector('.sun-icon');
+    const moonIcon = themeToggle.querySelector('.moon-icon');
+
+    function updateThemeIcon() {
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      sunIcon.style.display = isDark ? 'block' : 'none';
+      moonIcon.style.display = isDark ? 'none' : 'block';
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      updateThemeIcon();
+    });
+
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    html.setAttribute('data-theme', savedTheme);
+    updateThemeIcon();
+
+    const logsContainer = document.getElementById('logsContainer');
+    let logId = 0;
+    const maxLogs = 20;
+
+    const logMessages = [
+      { level: 'INFO', message: 'Request processed successfully', service: 'api-gateway' },
+      { level: 'INFO', message: 'Database connection established', service: 'data-service' },
+      { level: 'ERROR', message: 'User authentication failed for user_id=12345', service: 'auth-service' },
+      { level: 'WARN', message: 'API rate limit approaching threshold: 80%', service: 'rate-limiter' },
+      { level: 'INFO', message: 'Memory usage at 72%', service: 'monitoring' },
+      { level: 'INFO', message: 'Scheduled job completed: daily_report', service: 'scheduler' },
+      { level: 'ERROR', message: 'Connection timeout to external payment gateway', service: 'payment-api' },
+      { level: 'INFO', message: 'New user registered: john@example.com', service: 'user-service' },
+      { level: 'WARN', message: 'High latency detected: response time > 2s', service: 'performance' },
+      { level: 'INFO', message: 'Backup completed successfully', service: 'backup-service' },
+      { level: 'ERROR', message: 'Failed to process message from queue', service: 'message-queue' },
+      { level: 'WARN', message: 'Deprecated API endpoint called: /v1/users', service: 'api-gateway' },
+      { level: 'INFO', message: 'WebSocket connection established', service: 'websocket' },
+      { level: 'ERROR', message: 'Insufficient storage space', service: 'storage-service' },
+      { level: 'INFO', message: 'Health check passed', service: 'health-monitor' },
+      { level: 'INFO', message: 'Cache warmed up successfully', service: 'cache-service' },
+      { level: 'WARN', message: 'Disk usage at 85%', service: 'monitoring' },
+      { level: 'INFO', message: 'ML model loaded: log-classifier-v2', service: 'ai-engine' }
+    ];
+
+    function formatTime(date) {
+      return date.toISOString().split('T')[1].slice(0, 12);
+    }
+
+    function createLogEntry(log) {
+      const div = document.createElement('div');
+      div.className = 'log-entry';
+      div.innerHTML = `
+        <span class="log-time">${formatTime(new Date(log.timestamp))}</span>
+        <span class="log-level ${log.level.toLowerCase()}">${log.level}</span>
+        <span class="log-service">[${log.service}]</span>
+        <span class="log-message">${log.message}</span>
+      `;
+      return div;
+    }
+
+    async function loadInitialLogs() {
+      try {
+        const response = await fetch('/api/logs/demo');
+        const logs = await response.json();
+        logs.slice(0, maxLogs).forEach(log => {
+          logsContainer.appendChild(createLogEntry(log));
+        });
+        logId = logs.length;
+      } catch (e) {
+        console.error('Failed to load logs:', e);
+      }
+    }
+
+    function addRandomLog() {
+      const log = logMessages[Math.floor(Math.random() * logMessages.length)];
+      const newLog = {
+        id: ++logId,
+        timestamp: new Date().toISOString(),
+        level: log.level,
+        message: log.message,
+        service: log.service
+      };
+      
+      const entry = createLogEntry(newLog);
+      logsContainer.insertBefore(entry, logsContainer.firstChild);
+      
+      while (logsContainer.children.length > maxLogs) {
+        logsContainer.removeChild(logsContainer.lastChild);
+      }
+    }
+
+    loadInitialLogs();
+    setInterval(addRandomLog, 1800);
+
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const email = form.email.value;
+      
+      try {
+        const response = await fetch('/api/contacts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        
+        if (response.ok) {
+          alert('Thanks! We\'ll be in touch soon.');
+          form.reset();
+        } else {
+          alert('Something went wrong. Please try again.');
+        }
+      } catch (e) {
+        alert('Error submitting form. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>
