@@ -1,0 +1,79 @@
+basePath: /
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+    url: http://example.com/support
+  description: Authentication service API
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Auth Backend API
+  version: "1.0"
+paths:
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login with email and password
+      produces:
+      - application/json
+      responses: {}
+      summary: Login
+      tags:
+      - auth
+  /api/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh access token using refresh token
+      produces:
+      - application/json
+      responses: {}
+      summary: Refresh
+      tags:
+      - auth
+  /api/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user account
+      produces:
+      - application/json
+      responses: {}
+      summary: Register
+      tags:
+      - auth
+  /api/users/me:
+    get:
+      description: Get currently authenticated user profile
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get current user
+      tags:
+      - users
+  /api/users/password:
+    put:
+      consumes:
+      - application/json
+      description: Update password for authenticated user
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Update password
+      tags:
+      - users
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

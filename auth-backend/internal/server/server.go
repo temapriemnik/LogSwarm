@@ -12,6 +12,7 @@ import (
 	gorillaHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5/pgxpool"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 
 	"authbackend/generated/db"
 	"authbackend/internal/config"
@@ -54,6 +55,10 @@ func (s *Server) Initialize() error {
 	s.router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
 	})
+
+	s.router.PathPrefix("/docs").Handler(httpSwagger.Handler(
+		httpSwagger.URL("swagger/doc.json"),
+	))
 
 	publicRouter := s.router.PathPrefix("/api").Subrouter()
 	hnd.NewAuthHandler(authService, publicRouter)

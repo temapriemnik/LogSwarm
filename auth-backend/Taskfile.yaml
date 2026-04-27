@@ -8,10 +8,15 @@ env:
 output: prefixed
 
 tasks:
-  sqlc:
+sqlc:
     desc: Generate sqlc code
     cmds:
       - sqlc generate
+
+  swagger:
+    desc: Generate swagger docs
+    cmds:
+      - go install github.com/swaggo/swag/cmd/swag@latest && swag init -g cmd/server/main.go -o docs
 
   build:
     desc: Build the application

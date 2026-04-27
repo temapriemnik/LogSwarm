@@ -29,6 +29,12 @@ func (h *AuthHandler) RegisterRoutes() {
 	h.router.HandleFunc("/auth/refresh", h.Refresh).Methods("POST")
 }
 
+// @Summary Register
+// @Description Register a new user account
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Router /api/auth/register [post]
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Name     string `json:"name"`
@@ -48,9 +54,16 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(user)
 }
 
+// @Summary Login
+// @Description Login with email and password
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Router /api/auth/login [post]
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Email    string `json:"email"`
@@ -72,10 +85,16 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"access_token":  tokens.AccessToken,
 		"refresh_token": tokens.RefreshToken,
-		"user":          user,
+		"user":        user,
 	})
 }
 
+// @Summary Refresh
+// @Description Refresh access token using refresh token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Router /api/auth/refresh [post]
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		RefreshToken string `json:"refresh_token"`
