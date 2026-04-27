@@ -1,0 +1,23 @@
+services:
+  nats:
+    image: nats:latest
+    container_name: nats-jetstream
+    command: 
+      - "-c"
+      - "/etc/nats/nats-server.conf"
+    ports:
+      - "4222:4222"    # nats протокол
+      - "8222:8222"    # http мониторинг
+      - "6222:6222"    # route порт 
+    volumes:
+      - ./nats/nats-server.conf:/etc/nats/nats-server.conf:ro
+      - nats_data:/data/jetstream
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nats", "server", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  nats_data:
