@@ -1,0 +1,66 @@
+version: '3'
+
+env:
+  DB_USER: postgres
+  DB_PASSWORD: secret
+  DB_NAME: auth
+
+output: prefixed
+
+tasks:
+  sqlc:
+    desc: Generate sqlc code
+    cmds:
+      - sqlc generate
+
+  build:
+    desc: Build the application
+    cmds:
+      - go build -o bin/auth-backend ./cmd/server/main.go
+
+  run:
+    desc: Run the application
+    deps: [build]
+    cmds:
+      - ./bin/auth-backend
+    env:
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8080
+
+  test:
+    desc: Run unit tests
+    cmds:
+      - go test ./...
+
+  test-integration:
+    desc: Run integration tests
+    cmds:
+      - go test -tags=integration -v ./...
+
+  db-shell:
+    desc: Open PostgreSQL shell
+    cmds:
+      - docker exec -it auth-postgres psql -U ${DB_USER:-postgres} -d ${DB_NAME:-auth}
+
+  db-migrate:
+    desc: Run database migrations
+    cmds:
+      - docker exec -i auth-postgres psql -U ${DB_USER:-postgres} -d ${DB_NAME:-auth} < schema.sql
+      - docker exec -i auth-postgres psql -U ${DB_USER:-postgres} -d ${DB_NAME:-auth} < migrations/001_refresh_tokens.sql
+
+  lint:
+    desc: Run linter
+    cmds:
+      - go vet ./...
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - rm -rf bin/
+      - go clean
+
+  all-tests:
+    desc: Run all tests
+    cmds:
+      - task: test
+      - task: test-integration
