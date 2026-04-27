@@ -16,4 +16,6 @@ WORKDIR /app
 
 COPY --from=builder /app/log-agent .
 
+EXPOSE 8080
+
 ENTRYPOINT ["./log-agent"]
