@@ -2,7 +2,9 @@ version: "2"
 sql:
   - engine: "postgresql"
     queries: "query.sql"
-    schema: "schema.sql"
+    schema: 
+      - "schema.sql"
+      - "migrations/001_refresh_tokens.sql"
     gen:
       go:
         package: "db"
