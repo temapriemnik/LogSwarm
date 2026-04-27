@@ -12,7 +12,6 @@ import (
 
 	"authbackend/internal/config"
 	"authbackend/internal/domain"
-	"authbackend/internal/repository"
 )
 
 var (
@@ -28,9 +27,9 @@ type AuthService interface {
 }
 
 type authService struct {
-	userRepo      UserRepository
-	tokenRepo    repository.TokenRepository
-	jwtConfig    config.JWTConfig
+	userRepo   UserRepository
+	tokenRepo  TokenRepository
+	jwtConfig config.JWTConfig
 }
 
 type JWTClaims struct {
@@ -38,7 +37,7 @@ type JWTClaims struct {
 	jwt.RegisteredClaims
 }
 
-func NewAuthService(userRepo UserRepository, tokenRepo repository.TokenRepository, jwtCfg config.JWTConfig) AuthService {
+func NewAuthService(userRepo UserRepository, tokenRepo TokenRepository, jwtCfg config.JWTConfig) AuthService {
 	return &authService{
 		userRepo:   userRepo,
 		tokenRepo:  tokenRepo,

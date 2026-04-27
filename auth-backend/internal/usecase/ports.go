@@ -14,3 +14,10 @@ type UserRepository interface {
 	Delete(ctx context.Context, id int64) error
 	Activate(ctx context.Context, id int64) error
 }
+
+type TokenRepository interface {
+	Create(ctx context.Context, token *domain.RefreshToken) error
+	GetByToken(ctx context.Context, token string) (*domain.RefreshToken, error)
+	Delete(ctx context.Context, token string) error
+	DeleteAllForUser(ctx context.Context, userID int64) error
+}
