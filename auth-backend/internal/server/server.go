@@ -57,7 +57,7 @@ func (s *Server) Initialize() error {
 	})
 
 	s.router.PathPrefix("/docs").Handler(httpSwagger.Handler(
-		httpSwagger.URL("swagger/doc.json"),
+		httpSwagger.URL("swagger.json"),
 	))
 
 	publicRouter := s.router.PathPrefix("/api").Subrouter()

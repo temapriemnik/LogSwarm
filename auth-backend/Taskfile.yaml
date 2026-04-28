@@ -8,7 +8,7 @@ env:
 output: prefixed
 
 tasks:
-sqlc:
+  sqlc:
     desc: Generate sqlc code
     cmds:
       - sqlc generate

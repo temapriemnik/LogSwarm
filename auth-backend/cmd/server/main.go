@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"log"
 
+	_ "authbackend/docs"
 	"authbackend/internal/config"
 	"authbackend/internal/server"
 )
