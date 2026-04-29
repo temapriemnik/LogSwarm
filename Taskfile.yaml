@@ -56,7 +56,7 @@ tasks:
   lint:
     desc: Run linter
     cmds:
-      - go vet ./...
+      - go install golang.org/x/lint/golint@latest && golint ./...
 
   clean:
     desc: Clean build artifacts
