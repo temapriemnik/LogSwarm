@@ -1,0 +1,64 @@
+services:
+  nats:
+    image: nats:latest
+    container_name: nats
+    command: -c /etc/nats/nats-server.conf
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    volumes:
+      - ./nats-server.conf:/etc/nats/nats-server.conf:ro
+      - nats-jetstream-data:/data/jetstream
+    networks:
+      - logs-net
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
+    environment:
+      CLICKHOUSE_USER: "default"
+      CLICKHOUSE_PASSWORD: "clickhouse_pass"
+      CLICKHOUSE_DB: "logs_db"
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - ./clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - clickhouse-data:/var/lib/clickhouse
+    networks:
+      - logs-net
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+
+
+  consumer:
+    build: ./consumer
+    container_name: consumer
+    depends_on:
+      - nats
+      - clickhouse
+    environment:
+      NATS_URL: "nats://nats:4222"
+      NATS_USER: "app"
+      NATS_PASSWORD: "app_pass_456"
+      CLICKHOUSE_HOST: "clickhouse"
+      CLICKHOUSE_PORT: 9000
+      CLICKHOUSE_DB: "logs_db"
+      FILTER_LEVELS: "warn,error"
+      FILTER_KEYWORDS: "disk,failed"
+      FILTER_PROJECTS: "550e8400-e29b-41d4-a716-446655440000"
+      FILTER_MIN_TEXT_LEN: "5"
+      FILTER_EXCLUDE_KEYWORDS: "quiet"
+    networks:
+      - logs-net
+    restart: on-failure
+
+networks:
+  logs-net:
+    driver: bridge
+
+volumes:
+  nats-jetstream-data:
+  clickhouse-data:

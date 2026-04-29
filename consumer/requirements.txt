@@ -1,0 +1,2 @@
+nats-py==2.4.0
+clickhouse-driver==0.2.6
