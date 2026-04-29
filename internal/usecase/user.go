@@ -9,11 +9,13 @@ import (
 	"authbackend/internal/domain"
 )
 
+// ErrInvalidPassword is returned when a password is invalid.
 var (
 	ErrInvalidPassword = errors.New("invalid password")
 	ErrUserNotActive   = errors.New("user is not active")
 )
 
+// UserService defines the interface for user operations.
 type UserService interface {
 	Create(ctx context.Context, name, email, password string) (*domain.User, error)
 	GetByID(ctx context.Context, id int64) (*domain.User, error)
@@ -27,6 +29,7 @@ type userService struct {
 	userRepo UserRepository
 }
 
+// NewUserService creates a new UserService.
 func NewUserService(userRepo UserRepository) UserService {
 	return &userService{userRepo: userRepo}
 }

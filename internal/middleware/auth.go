@@ -9,6 +9,7 @@ import (
 	"authbackend/internal/usecase"
 )
 
+// Auth returns a middleware that validates JWT tokens.
 func Auth(authService usecase.AuthService) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -45,11 +46,13 @@ func contextWithUser(ctx context.Context, user *domain.User) context.Context {
 	return context.WithValue(ctx, userKey, user)
 }
 
+// UserFromContext retrieves the user from the context.
 func UserFromContext(ctx context.Context) (*domain.User, bool) {
 	user, ok := ctx.Value(userKey).(*domain.User)
 	return user, ok
 }
 
+// Protected wraps a handler with authentication.
 func Protected(handler http.Handler, authService usecase.AuthService) http.Handler {
 	return Auth(authService)(handler)
 }

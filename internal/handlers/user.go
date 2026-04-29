@@ -10,12 +10,14 @@ import (
 	"authbackend/internal/usecase"
 )
 
+// UserHandler handles user-related requests.
 type UserHandler struct {
 	userService usecase.UserService
 	authService usecase.AuthService
 	router     *mux.Router
 }
 
+// NewUserHandler creates a new UserHandler.
 func NewUserHandler(us usecase.UserService, as usecase.AuthService, router *mux.Router) *UserHandler {
 	h := &UserHandler{
 		userService: us,
@@ -26,11 +28,13 @@ func NewUserHandler(us usecase.UserService, as usecase.AuthService, router *mux.
 	return h
 }
 
+// RegisterRoutes registers the user routes.
 func (h *UserHandler) RegisterRoutes() {
 	h.router.HandleFunc("/users/me", h.Me).Methods("GET")
 	h.router.HandleFunc("/users/password", h.UpdatePassword).Methods("PUT")
 }
 
+// Me returns the current user profile.
 // @Summary Get current user
 // @Description Get currently authenticated user profile
 // @Tags users
@@ -50,6 +54,7 @@ func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
+// UpdatePassword updates the user's password.
 // @Summary Update password
 // @Description Update password for authenticated user
 // @Tags users

@@ -9,11 +9,13 @@ import (
 	"authbackend/internal/usecase"
 )
 
+// AuthHandler handles authentication requests.
 type AuthHandler struct {
 	authService usecase.AuthService
 	router     *mux.Router
 }
 
+// NewAuthHandler creates a new AuthHandler.
 func NewAuthHandler(as usecase.AuthService, router *mux.Router) *AuthHandler {
 	h := &AuthHandler{
 		authService: as,
@@ -23,12 +25,14 @@ func NewAuthHandler(as usecase.AuthService, router *mux.Router) *AuthHandler {
 	return h
 }
 
+// RegisterRoutes registers the authentication routes.
 func (h *AuthHandler) RegisterRoutes() {
 	h.router.HandleFunc("/auth/register", h.Register).Methods("POST")
 	h.router.HandleFunc("/auth/login", h.Login).Methods("POST")
 	h.router.HandleFunc("/auth/refresh", h.Refresh).Methods("POST")
 }
 
+// Register handles user registration.
 // @Summary Register
 // @Description Register a new user account
 // @Tags auth
@@ -63,6 +67,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
+// Login handles user login.
 // @Summary Login
 // @Description Login with email and password
 // @Tags auth
@@ -98,6 +103,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// Refresh handles token refresh.
 // @Summary Refresh
 // @Description Refresh access token using refresh token
 // @Tags auth

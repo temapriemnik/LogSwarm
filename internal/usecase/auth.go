@@ -14,11 +14,13 @@ import (
 	"authbackend/internal/domain"
 )
 
+// ErrInvalidToken is returned when a token is invalid.
 var (
 	ErrInvalidToken = errors.New("invalid token")
 	ErrTokenExpired = errors.New("token expired")
 )
 
+// AuthService defines the interface for authentication operations.
 type AuthService interface {
 	Register(ctx context.Context, name, email, password string) (*domain.User, error)
 	Login(ctx context.Context, email, password string) (*domain.TokenPair, *domain.User, error)
@@ -32,11 +34,13 @@ type authService struct {
 	jwtConfig config.JWTConfig
 }
 
+// JWTClaims represents JWT claims.
 type JWTClaims struct {
 	UserID int64 `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
+// NewAuthService creates a new AuthService.
 func NewAuthService(userRepo UserRepository, tokenRepo TokenRepository, jwtCfg config.JWTConfig) AuthService {
 	return &authService{
 		userRepo:   userRepo,

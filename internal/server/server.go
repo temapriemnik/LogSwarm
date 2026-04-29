@@ -22,12 +22,14 @@ import (
 	"authbackend/internal/usecase"
 )
 
+// Server represents the HTTP server.
 type Server struct {
 	router     *mux.Router
 	cfg        *config.Config
 	httpServer *http.Server
 }
 
+// New creates a new Server.
 func New(cfg *config.Config) (*Server, error) {
 	router := mux.NewRouter()
 	return &Server{
@@ -36,6 +38,7 @@ func New(cfg *config.Config) (*Server, error) {
 	}, nil
 }
 
+// Initialize sets up the server dependencies.
 func (s *Server) Initialize() error {
 	ctx := context.Background()
 
@@ -92,6 +95,7 @@ func (s *Server) Initialize() error {
 	return nil
 }
 
+// Start starts the HTTP server.
 func (s *Server) Start() error {
 	errCh := make(chan error, 1)
 	go func() {

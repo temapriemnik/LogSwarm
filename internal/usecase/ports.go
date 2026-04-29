@@ -6,6 +6,7 @@ import (
 	"authbackend/internal/domain"
 )
 
+// UserRepository defines the interface for user data access.
 type UserRepository interface {
 	Create(ctx context.Context, user *domain.User) error
 	GetByID(ctx context.Context, id int64) (*domain.User, error)
@@ -15,6 +16,7 @@ type UserRepository interface {
 	Activate(ctx context.Context, id int64) error
 }
 
+// TokenRepository defines the interface for token data access.
 type TokenRepository interface {
 	Create(ctx context.Context, token *domain.RefreshToken) error
 	GetByToken(ctx context.Context, token string) (*domain.RefreshToken, error)

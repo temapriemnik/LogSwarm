@@ -13,6 +13,7 @@ type userRepository struct {
 	db *db.Queries
 }
 
+// UserRepository defines the interface for user data access.
 type UserRepository interface {
 	Create(ctx context.Context, user *domain.User) error
 	GetByID(ctx context.Context, id int64) (*domain.User, error)
@@ -22,6 +23,7 @@ type UserRepository interface {
 	Activate(ctx context.Context, id int64) error
 }
 
+// NewUserRepository creates a new UserRepository.
 func NewUserRepository(db *db.Queries) UserRepository {
 	return &userRepository{db: db}
 }

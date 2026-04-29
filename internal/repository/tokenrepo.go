@@ -9,6 +9,7 @@ import (
 	"authbackend/internal/domain"
 )
 
+// TokenRepository defines the interface for token data access.
 type TokenRepository interface {
 	Create(ctx context.Context, token *domain.RefreshToken) error
 	GetByToken(ctx context.Context, token string) (*domain.RefreshToken, error)
@@ -20,6 +21,7 @@ type tokenRepository struct {
 	db *db.Queries
 }
 
+// NewTokenRepository creates a new TokenRepository.
 func NewTokenRepository(db *db.Queries) TokenRepository {
 	return &tokenRepository{db: db}
 }

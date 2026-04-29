@@ -7,17 +7,20 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Config holds the application configuration.
 type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
 	JWT      JWTConfig
 }
 
+// ServerConfig holds server configuration.
 type ServerConfig struct {
 	Host string
 	Port int
 }
 
+// DatabaseConfig holds database configuration.
 type DatabaseConfig struct {
 	Host     string
 	Port     int
@@ -26,12 +29,14 @@ type DatabaseConfig struct {
 	Name     string
 }
 
+// JWTConfig holds JWT configuration.
 type JWTConfig struct {
 	Secret          string
 	AccessExpiry    time.Duration
 	RefreshExpiry   time.Duration
 }
 
+// Load loads configuration from config file or environment variables.
 func Load() (*Config, error) {
 	viper.SetConfigName("config")
 	viper.SetConfigType("env")
@@ -63,6 +68,7 @@ func Load() (*Config, error) {
 	return &cfg, nil
 }
 
+// DSN returns the database connection string.
 func (c *DatabaseConfig) DSN() string {
 	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		c.User, c.Password, c.Host, c.Port, c.Name)
