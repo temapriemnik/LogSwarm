@@ -77,7 +77,13 @@ func (s *Server) Initialize() error {
 
 	s.httpServer = &http.Server{
 		Addr:         fmt.Sprintf("%s:%d", s.cfg.Server.Host, s.cfg.Server.Port),
-		Handler:      gorillaHandlers.CORS(gorillaHandlers.AllowedOrigins([]string{"*"}))(s.router),
+		Handler: gorillaHandlers.CORS(
+			gorillaHandlers.AllowedOrigins([]string{"*"}),
+			gorillaHandlers.AllowedMethods([]string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}),
+			gorillaHandlers.AllowedHeaders([]string{"*"}),
+			gorillaHandlers.ExposedHeaders([]string{"*"}),
+			gorillaHandlers.AllowCredentials(),
+		)(s.router),
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
