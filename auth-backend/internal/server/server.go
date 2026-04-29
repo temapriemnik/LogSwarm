@@ -56,7 +56,15 @@ func (s *Server) Initialize() error {
 		w.Write([]byte("OK"))
 	})
 
-	s.router.PathPrefix("/docs").Handler(httpSwagger.Handler(
+	s.router.HandleFunc("/docs/swagger.json", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "docs/swagger.json")
+	})
+
+	s.router.HandleFunc("/docs", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/docs/", http.StatusMovedPermanently)
+	})
+
+	s.router.PathPrefix("/docs/").Handler(httpSwagger.Handler(
 		httpSwagger.URL("swagger.json"),
 	))
 
