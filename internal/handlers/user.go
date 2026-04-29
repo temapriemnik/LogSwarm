@@ -36,6 +36,8 @@ func (h *UserHandler) RegisterRoutes() {
 // @Tags users
 // @Produce json
 // @Security BearerAuth
+// @Success 200 {object} domain.User
+// @Failure 401 {string} Unauthorized
 // @Router /api/users/me [get]
 func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
 	user, ok := middleware.UserFromContext(r.Context())
@@ -53,7 +55,12 @@ func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
 // @Tags users
 // @Accept json
 // @Produce json
+// @Param old_password body string true "Current password"
+// @Param new_password body string true "New password"
 // @Security BearerAuth
+// @Success 204
+// @Failure 400 {string} Invalid request
+// @Failure 401 {string} Unauthorized
 // @Router /api/users/password [put]
 func (h *UserHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	user, ok := middleware.UserFromContext(r.Context())

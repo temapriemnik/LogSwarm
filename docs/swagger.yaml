@@ -1,4 +1,28 @@
 basePath: /
+definitions:
+  domain.TokenPair:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+    type: object
+  domain.User:
+    properties:
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        format: int64
+        type: integer
+      isActive:
+        type: boolean
+      name:
+        type: string
+      passwordHash:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -18,9 +42,30 @@ paths:
       consumes:
       - application/json
       description: Login with email and password
+      parameters:
+      - description: User email
+        in: body
+        name: email
+        required: true
+        schema:
+          type: string
+      - description: User password
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.TokenPair'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
       summary: Login
       tags:
       - auth
@@ -29,9 +74,24 @@ paths:
       consumes:
       - application/json
       description: Refresh access token using refresh token
+      parameters:
+      - description: Refresh token
+        in: body
+        name: refresh_token
+        required: true
+        schema:
+          type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.TokenPair'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
       summary: Refresh
       tags:
       - auth
@@ -40,9 +100,36 @@ paths:
       consumes:
       - application/json
       description: Register a new user account
+      parameters:
+      - description: User name
+        in: body
+        name: name
+        required: true
+        schema:
+          type: string
+      - description: User email
+        in: body
+        name: email
+        required: true
+        schema:
+          type: string
+      - description: User password
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
       summary: Register
       tags:
       - auth
@@ -51,7 +138,15 @@ paths:
       description: Get currently authenticated user profile
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.User'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
       security:
       - BearerAuth: []
       summary: Get current user
@@ -62,9 +157,32 @@ paths:
       consumes:
       - application/json
       description: Update password for authenticated user
+      parameters:
+      - description: Current password
+        in: body
+        name: old_password
+        required: true
+        schema:
+          type: string
+      - description: New password
+        in: body
+        name: new_password
+        required: true
+        schema:
+          type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
       security:
       - BearerAuth: []
       summary: Update password

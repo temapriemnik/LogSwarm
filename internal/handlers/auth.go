@@ -34,6 +34,11 @@ func (h *AuthHandler) RegisterRoutes() {
 // @Tags auth
 // @Accept json
 // @Produce json
+// @Param name body string true "User name"
+// @Param email body string true "User email"
+// @Param password body string true "User password"
+// @Success 201 {object} domain.User
+// @Failure 400 {string} Invalid request
 // @Router /api/auth/register [post]
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var req struct {
@@ -63,6 +68,10 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 // @Tags auth
 // @Accept json
 // @Produce json
+// @Param email body string true "User email"
+// @Param password body string true "User password"
+// @Success 200 {object} domain.TokenPair
+// @Failure 401 {string} Invalid credentials
 // @Router /api/auth/login [post]
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var req struct {
@@ -94,6 +103,9 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Tags auth
 // @Accept json
 // @Produce json
+// @Param refresh_token body string true "Refresh token"
+// @Success 200 {object} domain.TokenPair
+// @Failure 401 {string} Invalid token
 // @Router /api/auth/refresh [post]
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	var req struct {
