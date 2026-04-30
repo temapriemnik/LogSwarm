@@ -50,8 +50,14 @@ tasks:
   db-migrate:
     desc: Run database migrations
     cmds:
-      - docker exec -i auth-postgres psql -U ${DB_USER:-postgres} -d ${DB_NAME:-auth} < schema.sql
+      - docker exec -i auth-postgres psql -U ${DB_USER:-postgres} -d ${DB_NAME:-auth} < schema..sql
       - docker exec -i auth-postgres psql -U ${DB_USER:-postgres} -d ${DB_NAME:-auth} < migrations/001_refresh_tokens.sql
+
+  migrate-db-cloud:
+    desc: Run database migrations on cloud PostgreSQL
+    cmds:
+      - PGPASSWORD=qbzXeLNRZJtBEolwmnkmhTvcdINDWIQv psql -h switchyard.proxy.rlwy.net -p 19574 -U postgres -d railway < schema.sql
+      - PGPASSWORD=qbzXeLNRZJtBEolwmnkmhTvcdINDWIQv psql -h switchyard.proxy.rlwy.net -p 19574 -U postgres -d railway < migrations/001_refresh_tokens.sql
 
   lint:
     desc: Run linter
